@@ -1,0 +1,15 @@
+/* src/components/ProfileTile.css */
+.profile-tile {
+    width: 100%; /* Ensures the tile takes up the full width within the grid */
+    aspect-ratio: 1; /* Ensures a 1:1 aspect ratio (square) */
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .profile-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures image fills the square tile */
+  }
+  
