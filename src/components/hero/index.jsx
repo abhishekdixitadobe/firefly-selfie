@@ -26,7 +26,7 @@ const Hero = () => {
       style={{
         backgroundImage: `url(${background})`,
         backgroundRepeat: "no-repeat",
-        height: "200px",
+        height: "100px",
         backgroundSize: "cover",
         overflow: "hidden",
         borderRadius: "20px",

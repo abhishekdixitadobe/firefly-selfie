@@ -5,6 +5,7 @@
   "dependencies": {
     "@adobe/react-spectrum": "^3.37.1",
     "@react-spectrum/toast": "^3.0.0-beta.16",
+    "axios": "^1.7.7",
     "cra-template": "1.2.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

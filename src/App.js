@@ -1,12 +1,71 @@
 import React, { useState, useEffect } from 'react';
-import { Flex, Grid, View, Provider, defaultTheme } from '@adobe/react-spectrum';
+import { Flex, Grid, View, Provider, defaultTheme, Button, ActionButton, ToggleButton } from '@adobe/react-spectrum';
 import ProfileTile from './components/ProfileTile';
-import Hero from './components/hero';
-import Footer from './components/footer';
-import Header from './components/header';
+import ChevronLeft from '@spectrum-icons/workflow/ChevronLeft';
+import ChevronRight from '@spectrum-icons/workflow/ChevronRight';
+import Play from '@spectrum-icons/workflow/Play';
+import Pause from '@spectrum-icons/workflow/Pause';
 import axios from 'axios';
 import { BrowserRouter } from 'react-router-dom';
-import { ToastContainer } from '@react-spectrum/toast';
+import Header from './components/header';
+import Footer from './components/footer';
+import Hero from './components/hero';
+
+const Carousel = ({ imageUrls }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAutoPlay, setIsAutoPlay] = useState(true);
+
+  const imagesPerPage = 18; // 6 columns x 3 rows
+  const autoPlayInterval = 3000;
+
+  const nextImageSet = () => {
+    setCurrentIndex((prevIndex) =>
+      prevIndex + imagesPerPage >= imageUrls.length ? 0 : prevIndex + imagesPerPage
+    );
+  };
+
+  const prevImageSet = () => {
+    setCurrentIndex((prevIndex) =>
+      prevIndex - imagesPerPage < 0 ? imageUrls.length - imagesPerPage : prevIndex - imagesPerPage
+    );
+  };
+
+  // Auto-play effect
+  useEffect(() => {
+    if (isAutoPlay) {
+      const interval = setInterval(nextImageSet, autoPlayInterval);
+      return () => clearInterval(interval);
+    }
+  }, [isAutoPlay, imageUrls]);
+
+  return (
+    <Flex direction="column" alignItems="center" gap="size-200">
+      {/* Grid layout for displaying 6 images (2 rows, 3 columns) */}
+      <Grid columns="repeat(6, 1fr)" rows="repeat(3, 1fr)" gap="size-200" alignItems="center">
+        {imageUrls.slice(currentIndex, currentIndex + imagesPerPage).map((url, index) => (
+          <View key={index} width="size-2000" height="size-2000">
+            <ProfileTile imageUrl={url} />
+          </View>
+        ))}
+      </Grid>
+      
+      {/* Navigation and Auto-play controls */}
+      <Flex gap="size-200" marginTop="size-400" alignItems="center">
+        <ActionButton onPress={prevImageSet}>
+          <ChevronLeft />
+        </ActionButton>
+
+        <ToggleButton isSelected={isAutoPlay} onPress={() => setIsAutoPlay(!isAutoPlay)}>
+          {isAutoPlay ? <Pause /> : <Play />}
+        </ToggleButton>
+
+        <ActionButton onPress={nextImageSet}>
+          <ChevronRight />
+        </ActionButton>
+      </Flex>
+    </Flex>
+  );
+};
 
 const App = () => {
   const [imageUrls, setImageUrls] = useState([]);
@@ -14,74 +73,48 @@ const App = () => {
   const fetchImageUrls = async () => {
     try {
       const response = await axios.post('https://786177-assetrefreshaio-stage.adobeio-static.net/api/v1/web/assetrefreshAIO/imageGallery');
-      const reversedUrls = response.data.imageUrls.reverse(); // Reversing the array
-      setImageUrls(reversedUrls);
+      setImageUrls(response.data.imageUrls.reverse());
     } catch (error) {
       console.error('Error fetching image URLs:', error);
     }
   };
 
   useEffect(() => {
-    // Fetch initial set of images
     fetchImageUrls();
-
-    // Set interval for auto-refresh every 30 seconds (30000 ms)
-    const intervalId = setInterval(() => {
-      fetchImageUrls();
-    }, 30000);
-
-    // Clear the interval when the component unmounts
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, []); // Empty dependency array to run only on mount
+    const intervalId = setInterval(fetchImageUrls, 30000);
+    return () => clearInterval(intervalId);
+  }, []);
 
   return (
     <Provider theme={defaultTheme} colorScheme="light">
-      <BrowserRouter>
-        <div className="applicationContentWrapper">
-          <ToastContainer />
-          <Grid
-            areas={['header header', 'content content', 'footer footer']}
-            columns={['1fr']}
-            rows={['size-800', 'auto', 'size-1000']}
-            height="100%"
-            gap="size-200"
-          >
-            <View
-              gridArea="header"
-              borderBottomColor="gray-300"
-              borderBottomWidth="thin"
-            >
-              <Header />
-            </View>
-            <View
-              gridArea="content"
-              height="100%"  // Ensuring content area takes up full height
-              backgroundColor="gray-100"
-            >
-              <Flex direction="column" width="80%" gap="size-200" alignItems="center" marginX="auto">
-                <View height="size-2600" marginTop="size-400" width="100%">
-                  <Hero />
-                </View>
-
-                <View width="100%">
-                  <Flex direction="column" gap={50}>
-                    <Grid columns="1fr 1fr 1fr" gap="size-300" marginBottom="size-1000">
-                      {imageUrls.slice(0, 16).map((url, index) => (
-                        <ProfileTile key={index} imageUrl={url} />
-                      ))}
-                    </Grid>
-                  </Flex>
-                </View>
-              </Flex>
-            </View>
-            <View gridArea="footer" width="100%" height="size-1000">
-              <Footer />
-            </View>
-          </Grid>
-        </div>
-      </BrowserRouter>
+		<BrowserRouter>
+			  <div className="applicationContentWrapper">
+				<Flex direction="column" height="100vh" justifyContent="space-between">
+					<View borderBottomColor="gray-300" borderBottomWidth="thin">
+					  <Header />
+					</View>
+					<View height="size-1200"  width="100%">
+						  <Hero />
+						</View>
+						<Grid
+						  areas={['content']}
+						  columns={['1fr']}
+						  rows={['auto']}
+						  height="100%"
+						  gap="size-200"
+						>
+						  <View
+							gridArea="content"
+							height="100%"
+							backgroundColor="gray-100"
+							padding="size-300"
+						  >
+							<Carousel imageUrls={imageUrls} />
+						  </View>
+						</Grid>
+				</Flex>
+			  </div>
+		</BrowserRouter>
     </Provider>
   );
 };
