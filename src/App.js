@@ -16,7 +16,7 @@ const Carousel = ({ imageUrls }) => {
   const [isAutoPlay, setIsAutoPlay] = useState(true);
 
   const imagesPerPage = 18; // 6 columns x 3 rows
-  const autoPlayInterval = 3000;
+  const autoPlayInterval = 10000;
 
   const nextImageSet = () => {
     setCurrentIndex((prevIndex) =>
